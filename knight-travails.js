@@ -1,39 +1,57 @@
-// class Node {
-//   constructor(N = null, NE = null, E = null, SE = null, S = null, SW = null, W = null, NW = null) {
-//     this.N = N;
-//     this.NE = NE;
-//     this.E = E;
-//     this.SE = SE;
-//     this.S = S;
-//     this.SW = SW;
-//     this.W = W;
-//     this.NW = NW;
-//   }
-// }
+import { MoveSequence, Move } from "./linked-list.js";
 
-class Square {
-  constructor(x, y) {
-    this.x = x;
-    this.y = y;
+function validateCoordinate(coordinate) {
+  if (
+    Array.isArray(coordinate) &&
+    coordinate.length === 2 &&
+    Number.isInteger(coordinate.at(0)) &&
+    Number.isInteger(coordinate.at(1)) &&
+    coordinate.at(0) < 9 &&
+    coordinate.at(0) > 0 &&
+    coordinate.at(1) < 9 &&
+    coordinate.at(1) > 0
+  ) {
+    return true;
   }
+  return false;
 }
-
-class Board {
-  constructor() {
-    this.board = this.createBoard();
-  }
-  createBoard() {
-    const board = [];
-    for (let i = 1; i <= 8; i++) {
-      const row = [];
-      for (let j = 1; j <= 8; j++) {
-        row.push(new Square(j, i));
+function* possibleMoves(move) {
+  const vectors = [
+    [1, 2],
+    [1, -2],
+    [-1, 2],
+    [-1, -2],
+    [2, 1],
+    [2, -1],
+    [-2, 1],
+    [-2, -1],
+  ];
+  const newVectors = vectors
+    .map((vector) => {
+      const mapped = [
+        move.coordinate[0] + vector[0],
+        move.coordinate[1] + vector[1],
+      ];
+      if (validateCoordinate(mapped)) {
+        return mapped;
       }
-      board.push(row);
-    }
-    return board;
+    })
+    .filter((vector) => vector !== undefined);
+
+  for (const newVector of newVectors) {
+    yield new MoveSequence(newVector, move);
   }
 }
 
-const chess = new Board();
-console.log(chess.board);
+function knightMoves(start, end) {
+  const queue = [new MoveSequence(start)];
+  while (JSON.stringify(queue.at(0).coordinate) !== JSON.stringify(end)) {
+    const item = queue.shift();
+    for (const abc of possibleMoves(item)) {
+      queue.push(abc);
+    }
+  }
+  return queue.at(0).toString();
+}
+
+console.log(knightMoves([8, 8], [1, 1]));
